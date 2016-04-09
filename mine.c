@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
-#include <memory.h>
 
 struct character {
   uint8_t seen;

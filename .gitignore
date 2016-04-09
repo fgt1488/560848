@@ -1,0 +1,10 @@
+yours
+mine
+*.exe
+*.o
+*.s
+.*.un~
+.*.sw?
+*.gcda
+foo_begin.txt
+foo_end.txt
