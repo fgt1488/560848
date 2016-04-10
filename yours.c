@@ -31,10 +31,10 @@ int main( int argc, char *argv[] ){
     while ( readret > 0 ){
         readret = read( 0, buf, sizeof( buf ));
 
-        for ( i = 0; i < readret; i++, str_index++ ){
+        for ( i = 0; i < readret; i++ ){
             if ( chars[buf[i]].status ){
                 chars[buf[i]].status--;
-                chars[buf[i]].index = str_index;
+                chars[buf[i]].index = str_index++;
             }
         }
     }
