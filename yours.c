@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
+#include <limits.h>
 
 enum {
     CHAR_SEEN_DUBS,
@@ -9,36 +11,47 @@ enum {
     CHAR_UNSEEN,
 };
 
-static unsigned char buf[0x1a000000];
-
-static unsigned char get_first_char( const char *str ){
-    uint8_t chars[256];
-    unsigned i;
-    memset( chars, CHAR_UNSEEN, 256 );
-
-    for ( i = 0; str[i]; i++ ){
-        if ( chars[ str[i] ] ){
-            chars[ str[i] ]--;
-        }
-    }
-
-    for ( i = 0; str[i]; i++ ){
-        if ( chars[str[i]] ){
-            return str[i];
-            break;
-        }
-    }
-
-    return '\0';
-}
+typedef struct character {
+    unsigned status;
+    unsigned index;
+} character_t;
 
 int main( int argc, char *argv[] ){
-    fgets( buf, sizeof( buf ), stdin );
+    character_t chars[256];
+    unsigned char buf[2 << 12];
+    size_t str_index = 0;
+    unsigned i;
 
-    unsigned char ret = get_first_char( buf );
+    for ( i = 0; i < 256; i++ ){
+        chars[i].status = CHAR_UNSEEN;
+        chars[i].index  = 0;
+    }
+
+    ssize_t readret = 1;
+    while ( readret > 0 ){
+        readret = read( 0, buf, sizeof( buf ));
+
+        for ( i = 0; i < readret; i++, str_index++ ){
+            if ( chars[buf[i]].status ){
+                chars[buf[i]].status--;
+                chars[buf[i]].index = str_index;
+            }
+        }
+    }
+
+    unsigned c;
+    unsigned lowest;
+    unsigned ret = '\0';
+
+    for ( lowest = UINT_MAX, c = 0; c < 256; c++ ){
+        if ( chars[c].status == CHAR_SEEN && chars[c].index < lowest ){
+            ret = c;
+            lowest = chars[c].index;
+        }
+    }
 
     if ( ret ){
-        printf( "First non-repeating character is %c\n", ret );
+        printf( "%c\n", ret );
 
     } else {
         puts( "u fugged" );
